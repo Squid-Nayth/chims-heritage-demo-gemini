@@ -4,9 +4,10 @@ import * as THREE from 'three';
 
 interface HeroProps {
   isDarkMode: boolean;
+  setView: (view: 'home' | 'gallery' | 'about' | 'contact') => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ isDarkMode }) => {
+const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -16,7 +17,7 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode }) => {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const segmentsRef = useRef<THREE.Group[]>([]);
-  const scrollPosRef = useRef(0);
+
 
   // --- CONFIGURATION ---
   // Tuned to match the reference design's density and scale
@@ -210,9 +211,8 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode }) => {
       frameId = requestAnimationFrame(animate);
       if (!cameraRef.current || !sceneRef.current || !rendererRef.current) return;
 
-      const targetZ = -scrollPosRef.current * 0.05;
-      const currentZ = cameraRef.current.position.z;
-      cameraRef.current.position.z += (targetZ - currentZ) * 0.1;
+      // Constant forward movement (perpetual scroll)
+      cameraRef.current.position.z -= 0.05;
 
       // Bidirectional Infinite Logic
       const tunnelLength = NUM_SEGMENTS * SEGMENT_DEPTH;
@@ -267,8 +267,7 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode }) => {
     };
     animate();
 
-    const onScroll = () => { scrollPosRef.current = window.scrollY; };
-    window.addEventListener('scroll', onScroll);
+
     const handleResize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -279,7 +278,7 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode }) => {
     window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
+
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(frameId);
       renderer.dispose();
@@ -330,27 +329,27 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode }) => {
   }, []);
 
   return (
-    <div ref={containerRef} className={`relative w-full h-[10000vh] transition-colors duration-700 ${isDarkMode ? 'bg-[#050505]' : 'bg-white'}`}>
+    <div ref={containerRef} className={`relative w-full h-screen transition-colors duration-700 ${isDarkMode ? 'bg-[#050505]' : 'bg-white'}`}>
       <div className="fixed inset-0 w-full h-full overflow-hidden z-0">
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
 
-      <div className="fixed inset-0 z-10 flex items-center justify-center pointer-events-none">
+      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
         <div ref={contentRef} className="text-center flex flex-col items-center max-w-3xl px-6 pointer-events-auto mix-blend-multiply-normal">
 
-          <h1 className={`text-[5rem] md:text-[7rem] lg:text-[8rem] leading-[0.85] font-bold tracking-tighter mb-8 transition-colors duration-500 ${isDarkMode ? 'text-white' : 'text-dark'}`}>
-            Chim's Heritage.
+          <h1 className={`text-[4rem] md:text-[6rem] lg:text-[7rem] leading-[0.9] font-bold tracking-tighter mb-8 transition-colors duration-500 ${isDarkMode ? 'text-white' : 'text-dark'}`}>
+            Art Intemporel,<br />Pensé Pour Émouvoir
           </h1>
 
           <p className={`text-lg md:text-xl font-normal max-w-lg leading-relaxed mb-10 transition-colors duration-500 ${isDarkMode ? 'text-gray-400' : 'text-muted'}`}>
-            Capturez l'essence de vos émotions sur toile. Des œuvres uniques et sur mesure, créées avec passion pour <span className="text-accent font-medium">sublimer</span> votre espace.
+            Artiste peintre reconnu. Donnez vie à vos émotions à travers des œuvres et portraits sur mesure.
           </p>
 
           <div className="flex items-center gap-6">
-            <button className={`rounded-full px-8 py-3.5 text-sm font-medium hover:scale-105 transition-all duration-300 ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-dark text-white'}`}>
-              Commander
+            <button className={`rounded-full px-8 py-3.5 text-sm font-medium hover:scale-105 transition-all duration-300 ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-[#D4AF37] text-white'}`} onClick={() => setView('contact')}>
+              Commander une œuvre
             </button>
-            <button className={`text-sm font-medium hover:opacity-70 transition-opacity flex items-center gap-1 ${isDarkMode ? 'text-white' : 'text-dark'}`}>
+            <button className={`text-sm font-medium hover:opacity-70 transition-opacity flex items-center gap-1 ${isDarkMode ? 'text-white' : 'text-dark'}`} onClick={() => setView('gallery')}>
               Voir la galerie <span>→</span>
             </button>
           </div>

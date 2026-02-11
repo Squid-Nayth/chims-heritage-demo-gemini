@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
+
+import Footer from './components/Footer';
 import gsap from 'gsap';
+
+import GalleryPage from './components/pages/GalleryPage';
+import ContactPage from './components/pages/ContactPage';
+import AboutPage from './components/pages/AboutPage';
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentView, setCurrentView] = useState<'home' | 'gallery' | 'about' | 'contact'>('home');
 
   const toggleTheme = () => {
     setIsDarkMode((prev) => !prev);
@@ -19,16 +26,24 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen transition-colors duration-700 ${isDarkMode ? 'bg-[#050505] text-white selection:bg-orange-900 selection:text-orange-100' : 'bg-white text-slate-900 selection:bg-orange-100 selection:text-orange-900'} overflow-hidden`}>
-      <Navigation isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+    <div className={`min-h-screen transition-colors duration-700 ${isDarkMode ? 'bg-[#050505] text-white selection:bg-orange-900 selection:text-orange-100' : 'bg-white text-slate-900 selection:bg-orange-100 selection:text-orange-900'} overflow-x-hidden`}>
+      <Navigation isDarkMode={isDarkMode} toggleTheme={toggleTheme} setView={setCurrentView} />
       <main>
-        <Hero isDarkMode={isDarkMode} />
+        {currentView === 'home' && (
+          <>
+            <Hero isDarkMode={isDarkMode} setView={setCurrentView} />
+          </>
+        )}
+
+        {currentView === 'gallery' && <GalleryPage isDarkMode={isDarkMode} setView={setCurrentView} />}
+        {currentView === 'contact' && <ContactPage isDarkMode={isDarkMode} />}
+        {currentView === 'about' && <AboutPage isDarkMode={isDarkMode} setView={setCurrentView} />}
       </main>
 
+      <Footer isDarkMode={isDarkMode} />
+
       {/* Footer fixed at bottom right or hidden for infinite feel */}
-      <footer className={`fixed bottom-4 right-6 text-[10px] pointer-events-none z-50 transition-colors duration-500 ${isDarkMode ? 'text-white/30' : 'text-black/30'}`}>
-        <p>&copy; {new Date().getFullYear()} Chim's Heritage.</p>
-      </footer>
+
     </div>
   );
 };
