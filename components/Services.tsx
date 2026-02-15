@@ -24,7 +24,7 @@ const Services: React.FC<ServicesProps> = ({ isDarkMode }) => {
     ];
 
     return (
-        <section className={`relative z-10 py-24 px-6 md:px-12 transition-colors duration-700 ${isDarkMode ? 'bg-black/80 text-white backdrop-blur-md' : 'bg-white/80 text-slate-900 backdrop-blur-md'}`}>
+        <section className={`relative z-10 py-24 px-6 md:px-12 transition-colors duration-700 ${isDarkMode ? 'bg-black/80 text-white backdrop-blur-md' : 'bg-white/80 text-zinc-900 backdrop-blur-md'}`}>
             <div className="max-w-7xl mx-auto">
                 <div className="mb-16">
                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">Services & Prestations</h2>
@@ -40,7 +40,7 @@ const Services: React.FC<ServicesProps> = ({ isDarkMode }) => {
                             <h3 className="text-2xl font-semibold mb-4 group-hover:text-orange-500 transition-colors duration-300">
                                 {service.title}
                             </h3>
-                            <p className={`leading-relaxed text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <p className={`leading-relaxed text-lg ${isDarkMode ? 'text-gray-600' : 'text-gray-600'}`}>
                                 {service.description}
                             </p>
                         </div>

@@ -1,6 +1,6 @@
 import React, { useRef, useLayoutEffect, useEffect } from 'react';
 import gsap from 'gsap';
-import * as THREE from 'three';
+import * as THREE from 'THREE';
 
 interface HeroProps {
   isDarkMode: boolean;
@@ -45,131 +45,8 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
     "/Assets/cimg7254.jpg",
     "/Assets/cimg7257.jpg",
     "/Assets/cimg7263.jpg",
+    "/Assets/Chims-lartiste.jpeg",
   ];
-
-  // Helper: Create a segment with grid lines and filled cells
-  const createSegment = (zPos: number) => {
-    const group = new THREE.Group();
-    group.position.z = zPos;
-
-    const w = TUNNEL_WIDTH / 2;
-    const h = TUNNEL_HEIGHT / 2;
-    const d = SEGMENT_DEPTH;
-
-    // --- 1. Grid Lines ---
-    // Start with default light mode colors; these will be updated by useEffect immediately on mount
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0xb0b0b0, transparent: true, opacity: 0.5 });
-    const lineGeo = new THREE.BufferGeometry();
-    const vertices: number[] = [];
-
-    // A. Longitudinal Lines (Z-axis)
-    // Floor & Ceiling (varying X)
-    for (let i = 0; i <= FLOOR_COLS; i++) {
-      const x = -w + (i * COL_WIDTH);
-      // Floor line
-      vertices.push(x, -h, 0, x, -h, -d);
-      // Ceiling line
-      vertices.push(x, h, 0, x, h, -d);
-    }
-    // Walls (varying Y) - excluding top/bottom corners already drawn
-    for (let i = 1; i < WALL_ROWS; i++) {
-      const y = -h + (i * ROW_HEIGHT);
-      // Left Wall line
-      vertices.push(-w, y, 0, -w, y, -d);
-      // Right Wall line
-      vertices.push(w, y, 0, w, y, -d);
-    }
-
-    // B. Latitudinal Lines (Ring at z=0)
-    // Floor (Bottom edge)
-    vertices.push(-w, -h, 0, w, -h, 0);
-    // Ceiling (Top edge)
-    vertices.push(-w, h, 0, w, h, 0);
-    // Left Wall (Left edge)
-    vertices.push(-w, -h, 0, -w, h, 0);
-    // Right Wall (Right edge)
-    vertices.push(w, -h, 0, w, h, 0);
-
-    lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    const lines = new THREE.LineSegments(lineGeo, lineMaterial);
-    group.add(lines);
-
-    // Initial population of images
-    populateImages(group, w, h, d);
-
-    return group;
-  };
-
-  // Helper: Populate images in a segment
-  const populateImages = (group: THREE.Group, w: number, h: number, d: number) => {
-    const textureLoader = new THREE.TextureLoader();
-    const cellMargin = 0.4;
-
-    const addImg = (pos: THREE.Vector3, rot: THREE.Euler, wd: number, ht: number) => {
-      const url = imageUrls[Math.floor(Math.random() * imageUrls.length)];
-      const geom = new THREE.PlaneGeometry(wd - cellMargin, ht - cellMargin);
-      const mat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, side: THREE.DoubleSide });
-      textureLoader.load(url, (tex) => {
-        tex.minFilter = THREE.LinearFilter;
-        mat.map = tex;
-        mat.needsUpdate = true;
-        gsap.to(mat, { opacity: 0.85, duration: 1 });
-      });
-      const m = new THREE.Mesh(geom, mat);
-      m.position.copy(pos);
-      m.rotation.copy(rot);
-      m.name = "slab_image";
-      group.add(m);
-    };
-
-    // Logic: Iterate slots, but skip if the previous slot was filled.
-    // Threshold adjusted to 0.80 (20%) to compensate for skipped slots and maintain density.
-
-    // Floor
-    let lastFloorIdx = -999;
-    for (let i = 0; i < FLOOR_COLS; i++) {
-      // Must be at least 2 slots away from last image to avoid adjacency (i > last + 1)
-      if (i > lastFloorIdx + 1) {
-        if (Math.random() > 0.80) {
-          addImg(new THREE.Vector3(-w + i * COL_WIDTH + COL_WIDTH / 2, -h, -d / 2), new THREE.Euler(-Math.PI / 2, 0, 0), COL_WIDTH, d);
-          lastFloorIdx = i;
-        }
-      }
-    }
-
-    // Ceiling
-    let lastCeilIdx = -999;
-    for (let i = 0; i < FLOOR_COLS; i++) {
-      if (i > lastCeilIdx + 1) {
-        if (Math.random() > 0.88) { // Keep ceiling sparser
-          addImg(new THREE.Vector3(-w + i * COL_WIDTH + COL_WIDTH / 2, h, -d / 2), new THREE.Euler(Math.PI / 2, 0, 0), COL_WIDTH, d);
-          lastCeilIdx = i;
-        }
-      }
-    }
-
-    // Left Wall
-    let lastLeftIdx = -999;
-    for (let i = 0; i < WALL_ROWS; i++) {
-      if (i > lastLeftIdx + 1) {
-        if (Math.random() > 0.80) {
-          addImg(new THREE.Vector3(-w, -h + i * ROW_HEIGHT + ROW_HEIGHT / 2, -d / 2), new THREE.Euler(0, Math.PI / 2, 0), d, ROW_HEIGHT);
-          lastLeftIdx = i;
-        }
-      }
-    }
-
-    // Right Wall
-    let lastRightIdx = -999;
-    for (let i = 0; i < WALL_ROWS; i++) {
-      if (i > lastRightIdx + 1) {
-        if (Math.random() > 0.80) {
-          addImg(new THREE.Vector3(w, -h + i * ROW_HEIGHT + ROW_HEIGHT / 2, -d / 2), new THREE.Euler(0, -Math.PI / 2, 0), d, ROW_HEIGHT);
-          lastRightIdx = i;
-        }
-      }
-    }
-  }
 
   // --- INITIAL SETUP ---
   useEffect(() => {
@@ -178,6 +55,20 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
     // THREE JS SETUP
     const scene = new THREE.Scene();
     sceneRef.current = scene;
+
+    // Preload Textures IMMEDIATELY
+    const textureLoader = new THREE.TextureLoader();
+    const loadedTextures = imageUrls.map(url => {
+      const tex = textureLoader.load(url);
+      tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      return tex;
+    });
+
+    // Shared Geometries
+    const cellMargin = 0.4;
+    const floorGeo = new THREE.PlaneGeometry(COL_WIDTH - cellMargin, SEGMENT_DEPTH - cellMargin);
+    const wallGeo = new THREE.PlaneGeometry(SEGMENT_DEPTH - cellMargin, ROW_HEIGHT - cellMargin);
 
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -192,14 +83,113 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
       powerPreference: "high-performance"
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     rendererRef.current = renderer;
+
+    // Helper to populate images using preloaded textures
+    const populateImagesFast = (group: THREE.Group, w: number, h: number, d: number) => {
+      const addImg = (pos: THREE.Vector3, rot: THREE.Euler, isWall: boolean) => {
+        const tex = loadedTextures[Math.floor(Math.random() * loadedTextures.length)];
+        const mat = new THREE.MeshBasicMaterial({
+          map: tex,
+          transparent: true,
+          opacity: 0.85,
+          side: THREE.DoubleSide
+        });
+
+        const m = new THREE.Mesh(isWall ? wallGeo : floorGeo, mat);
+        m.position.copy(pos);
+        m.rotation.copy(rot);
+        m.name = "slab_image";
+        group.add(m);
+      };
+
+      // Floor
+      let lastFloorIdx = -999;
+      for (let i = 0; i < FLOOR_COLS; i++) {
+        if (i > lastFloorIdx + 1) {
+          if (Math.random() > 0.80) {
+            addImg(new THREE.Vector3(-w + i * COL_WIDTH + COL_WIDTH / 2, -h, -d / 2), new THREE.Euler(-Math.PI / 2, 0, 0), false);
+            lastFloorIdx = i;
+          }
+        }
+      }
+
+      // Ceiling
+      let lastCeilIdx = -999;
+      for (let i = 0; i < FLOOR_COLS; i++) {
+        if (i > lastCeilIdx + 1) {
+          if (Math.random() > 0.88) {
+            addImg(new THREE.Vector3(-w + i * COL_WIDTH + COL_WIDTH / 2, h, -d / 2), new THREE.Euler(Math.PI / 2, 0, 0), false);
+            lastCeilIdx = i;
+          }
+        }
+      }
+
+      // Left Wall
+      let lastLeftIdx = -999;
+      for (let i = 0; i < WALL_ROWS; i++) {
+        if (i > lastLeftIdx + 1) {
+          if (Math.random() > 0.80) {
+            addImg(new THREE.Vector3(-w, -h + i * ROW_HEIGHT + ROW_HEIGHT / 2, -d / 2), new THREE.Euler(0, Math.PI / 2, 0), true);
+            lastLeftIdx = i;
+          }
+        }
+      }
+
+      // Right Wall
+      let lastRightIdx = -999;
+      for (let i = 0; i < WALL_ROWS; i++) {
+        if (i > lastRightIdx + 1) {
+          if (Math.random() > 0.80) {
+            addImg(new THREE.Vector3(w, -h + i * ROW_HEIGHT + ROW_HEIGHT / 2, -d / 2), new THREE.Euler(0, -Math.PI / 2, 0), true);
+            lastRightIdx = i;
+          }
+        }
+      }
+    };
+
+    // Helper: Create Segment
+    const createSegmentFast = (zPos: number) => {
+      const group = new THREE.Group();
+      group.position.z = zPos;
+
+      const w = TUNNEL_WIDTH / 2;
+      const h = TUNNEL_HEIGHT / 2;
+      const d = SEGMENT_DEPTH;
+
+      // Lines
+      // Note: isDarkMode comes from closure (might be stale if not careful, but we have ThemeEffect updating materials anyway)
+      // We set initial values, ThemeEffect will override immediately.
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0xb0b0b0, transparent: true, opacity: 0.35 });
+      const lineGeo = new THREE.BufferGeometry();
+      const vertices: number[] = [];
+
+      for (let i = 0; i <= FLOOR_COLS; i++) {
+        const x = -w + (i * COL_WIDTH);
+        vertices.push(x, -h, 0, x, -h, -d, x, h, 0, x, h, -d);
+      }
+      for (let i = 1; i < WALL_ROWS; i++) {
+        const y = -h + (i * ROW_HEIGHT);
+        vertices.push(-w, y, 0, -w, y, -d, w, y, 0, w, y, -d);
+      }
+      vertices.push(-w, -h, 0, w, -h, 0, -w, h, 0, w, h, 0, -w, -h, 0, -w, h, 0, w, -h, 0, w, h, 0);
+
+      lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      const lines = new THREE.LineSegments(lineGeo, lineMaterial);
+      group.add(lines);
+
+      populateImagesFast(group, w, h, d);
+
+      return group;
+    };
+
 
     // Generate segments
     const segments: THREE.Group[] = [];
     for (let i = 0; i < NUM_SEGMENTS; i++) {
       const z = -i * SEGMENT_DEPTH;
-      const segment = createSegment(z);
+      const segment = createSegmentFast(z);
       scene.add(segment);
       segments.push(segment);
     }
@@ -211,55 +201,26 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
       frameId = requestAnimationFrame(animate);
       if (!cameraRef.current || !sceneRef.current || !rendererRef.current) return;
 
-      // Constant forward movement (perpetual scroll)
       cameraRef.current.position.z -= 0.05;
-
-      // Bidirectional Infinite Logic
-      const tunnelLength = NUM_SEGMENTS * SEGMENT_DEPTH;
-
       const camZ = cameraRef.current.position.z;
 
       segmentsRef.current.forEach((segment) => {
-        // 1. Moving Forward
         if (segment.position.z > camZ + SEGMENT_DEPTH) {
+          // Recycling
           let minZ = 0;
           segmentsRef.current.forEach(s => minZ = Math.min(minZ, s.position.z));
           segment.position.z = minZ - SEGMENT_DEPTH;
 
-          // Re-populate
-          const toRemove: THREE.Object3D[] = [];
-          segment.traverse((c) => { if (c.name === 'slab_image') toRemove.push(c); });
-          toRemove.forEach(c => {
-            segment.remove(c);
-            if (c instanceof THREE.Mesh) {
-              c.geometry.dispose();
-              if (c.material.map) c.material.map.dispose();
-              c.material.dispose();
+          // Cleanup old images
+          for (let i = segment.children.length - 1; i >= 0; i--) {
+            if (segment.children[i].name === 'slab_image') {
+              const m = segment.children[i] as THREE.Mesh;
+              segment.remove(m);
+              if (m.material instanceof THREE.Material) m.material.dispose();
+              // Do NOT dispose geometry since it's shared
             }
-          });
-          const w = TUNNEL_WIDTH / 2; const h = TUNNEL_HEIGHT / 2; const d = SEGMENT_DEPTH;
-          populateImages(segment, w, h, d);
-        }
-
-        // 2. Moving Backward
-        if (segment.position.z < camZ - tunnelLength - SEGMENT_DEPTH) {
-          let maxZ = -999999;
-          segmentsRef.current.forEach(s => maxZ = Math.max(maxZ, s.position.z));
-          segment.position.z = maxZ + SEGMENT_DEPTH;
-
-          // Re-populate
-          const toRemove: THREE.Object3D[] = [];
-          segment.traverse((c) => { if (c.name === 'slab_image') toRemove.push(c); });
-          toRemove.forEach(c => {
-            segment.remove(c);
-            if (c instanceof THREE.Mesh) {
-              c.geometry.dispose();
-              if (c.material.map) c.material.map.dispose();
-              c.material.dispose();
-            }
-          });
-          const w = TUNNEL_WIDTH / 2; const h = TUNNEL_HEIGHT / 2; const d = SEGMENT_DEPTH;
-          populateImages(segment, w, h, d);
+          }
+          populateImagesFast(segment, TUNNEL_WIDTH / 2, TUNNEL_HEIGHT / 2, SEGMENT_DEPTH);
         }
       });
 
@@ -278,9 +239,11 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
     window.addEventListener('resize', handleResize);
 
     return () => {
-
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(frameId);
+      floorGeo.dispose();
+      wallGeo.dispose();
+      loadedTextures.forEach(t => t.dispose());
       renderer.dispose();
     };
   }, []); // Run once on mount
@@ -290,17 +253,16 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
     if (!sceneRef.current) return;
 
     // Define theme colors
-    const bgHex = isDarkMode ? 0x050505 : 0xffffff;
-    const fogHex = isDarkMode ? 0x050505 : 0xffffff;
-
-    // Light mode: Light Grey lines (0xb0b0b0), higher opacity
-    // Dark mode: Medium Grey lines (0x555555) for visibility, slightly adjusted opacity
-    const lineHex = isDarkMode ? 0x555555 : 0xb0b0b0;
-    const lineOp = isDarkMode ? 0.35 : 0.5;
+    const bgHex = isDarkMode ? 0x1A1816 : 0xF3F1ED;
+    const fogHex = isDarkMode ? 0x1A1816 : 0xF3F1ED;
+    const lineHex = isDarkMode ? 0x333333 : 0xdcdcdc;
+    const lineOp = isDarkMode ? 0.6 : 0.35;
 
     // Apply to scene
     sceneRef.current.background = new THREE.Color(bgHex);
-    if (sceneRef.current.fog) {
+    if (!sceneRef.current.fog) {
+      sceneRef.current.fog = new THREE.FogExp2(fogHex, FOG_DENSITY);
+    } else {
       (sceneRef.current.fog as THREE.FogExp2).color.setHex(fogHex);
     }
 
@@ -329,27 +291,27 @@ const Hero: React.FC<HeroProps> = ({ isDarkMode, setView }) => {
   }, []);
 
   return (
-    <div ref={containerRef} className={`relative w-full h-screen transition-colors duration-700 ${isDarkMode ? 'bg-[#050505]' : 'bg-white'}`}>
-      <div className="fixed inset-0 w-full h-full overflow-hidden z-0">
+    <div ref={containerRef} className={`relative w-full h-screen transition-colors duration-700 ${isDarkMode ? 'bg-[#1A1816]' : 'bg-[#F3F1ED]'}`}>
+      <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
         <canvas ref={canvasRef} className="w-full h-full block" />
       </div>
 
-      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto">
         <div ref={contentRef} className="text-center flex flex-col items-center max-w-3xl px-6 pointer-events-auto mix-blend-multiply-normal">
 
-          <h1 className={`text-[4rem] md:text-[6rem] lg:text-[7rem] leading-[0.9] font-bold tracking-tighter mb-8 transition-colors duration-500 ${isDarkMode ? 'text-white' : 'text-dark'}`}>
+          <h1 className={`text-[4rem] md:text-[6rem] lg:text-[7rem] leading-[0.9] font-bold tracking-tighter mb-8 transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>
             Art Intemporel,<br />Pensé Pour Émouvoir
           </h1>
 
-          <p className={`text-lg md:text-xl font-normal max-w-lg leading-relaxed mb-10 transition-colors duration-500 ${isDarkMode ? 'text-gray-400' : 'text-muted'}`}>
+          <p className={`text-lg md:text-xl font-normal max-w-lg leading-relaxed mb-10 transition-colors duration-700 ${isDarkMode ? 'text-white/70' : 'text-black/70'}`}>
             Artiste peintre reconnu. Donnez vie à vos émotions à travers des œuvres et portraits sur mesure.
           </p>
 
           <div className="flex items-center gap-6">
-            <button className={`rounded-full px-8 py-3.5 text-sm font-medium hover:scale-105 transition-all duration-300 ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-[#D4AF37] text-white'}`} onClick={() => setView('contact')}>
+            <button className="bg-gold text-black rounded-full px-8 py-3.5 text-sm font-bold uppercase tracking-widest hover:scale-105 transition-all duration-300 shadow-xl shadow-gold/20" onClick={() => setView('contact')}>
               Commander une œuvre
             </button>
-            <button className={`text-sm font-medium hover:opacity-70 transition-opacity flex items-center gap-1 ${isDarkMode ? 'text-white' : 'text-dark'}`} onClick={() => setView('gallery')}>
+            <button className={`text-sm font-medium hover:opacity-70 transition-opacity flex items-center gap-1 ${isDarkMode ? 'text-white' : 'text-black'}`} onClick={() => setView('gallery')}>
               Voir la galerie <span>→</span>
             </button>
           </div>
