@@ -25,7 +25,7 @@ import BoutiquePage from './components/pages/BoutiquePage';
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [currentView, setCurrentView] = useState<'home' | 'gallery' | 'about' | 'contact' | 'paysages' | 'spirituelles' | 'elephants' | 'musee' | 'portraits-uniques' | 'biographie' | 'cv' | 'philosophie' | 'tous-archives' | 'evenements' | 'boutique' | 'account' | 'services'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'gallery' | 'about' | 'contact' | 'paysages' | 'spirituelles' | 'elephants' | 'musee' | 'portraits-uniques' | 'biographie' | 'cv' | 'philosophie' | 'tous-archives' | 'evenements' | 'boutique' | 'services'>('home');
 
   const categoryData = {
     paysages: {
@@ -133,14 +133,7 @@ const App: React.FC = () => {
         {currentView === 'tous-archives' && <ArchivesPage isDarkMode={isDarkMode} />}
         {currentView === 'evenements' && <EvenementsPage isDarkMode={isDarkMode} />}
         {currentView === 'boutique' && <BoutiquePage isDarkMode={isDarkMode} />}
-        {currentView === 'account' && (
-          <div className="min-h-[60vh] flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-4 uppercase tracking-tighter">Mon Compte</h2>
-              <p className="opacity-50 italic">Espace membre en cours de maintenance...</p>
-            </div>
-          </div>
-        )}
+
       </main>
 
       <Footer isDarkMode={isDarkMode} />

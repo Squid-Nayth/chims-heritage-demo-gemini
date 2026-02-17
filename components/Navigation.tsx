@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface NavigationProps {
   isDarkMode: boolean;
   toggleTheme: () => void;
-  setView: (view: 'home' | 'gallery' | 'about' | 'contact' | 'paysages' | 'spirituelles' | 'elephants' | 'musee' | 'portraits-uniques' | 'biographie' | 'cv' | 'philosophie' | 'tous-archives' | 'evenements' | 'boutique' | 'account' | 'services') => void;
+  setView: (view: 'home' | 'gallery' | 'about' | 'contact' | 'paysages' | 'spirituelles' | 'elephants' | 'musee' | 'portraits-uniques' | 'biographie' | 'cv' | 'philosophie' | 'tous-archives' | 'evenements' | 'boutique' | 'services') => void;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ isDarkMode, toggleTheme, setView }) => {
@@ -81,14 +81,7 @@ const Navigation: React.FC<NavigationProps> = ({ isDarkMode, toggleTheme, setVie
             )}
           </button>
 
-          {/* Mon Compte (Icon Style) */}
-          <button
-            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${isDarkMode ? 'text-white hover:bg-white/10' : 'text-black hover:bg-black/5'}`}
-            onClick={() => { setView('account'); setIsAboutOpen(false); setIsGalleryOpen(false); }}
-            aria-label="Mon Compte"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          </button>
+
 
           {/* Panier */}
           <button className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${isDarkMode ? 'text-white hover:bg-white/10' : 'text-black hover:bg-black/5'}`} aria-label="Panier">

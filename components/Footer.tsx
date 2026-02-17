@@ -48,7 +48,7 @@ const Footer: React.FC<FooterProps> = ({ isDarkMode }) => {
                             className={`flex-1 bg-transparent px-6 py-3 text-sm focus:outline-none ${isDarkMode ? 'text-[#F3F1ED] placeholder-white/30' : 'text-gray-900 placeholder-gray-500'}`}
                         />
                         <button className="bg-gold text-white px-8 py-3 text-sm font-bold uppercase tracking-wider hover:bg-[#b5952f] transition-colors rounded-full">
-                            SUBSCRIBE
+                            ABONNEZ-VOUS
                         </button>
                     </form>
                 </div>
@@ -57,7 +57,7 @@ const Footer: React.FC<FooterProps> = ({ isDarkMode }) => {
                 <div className="pt-2">
                     <h3 className="font-bold uppercase tracking-wider mb-6 text-sm md:text-base">CHIMS HERITAGE</h3>
                     <ul className={`space-y-3 text-sm ${isDarkMode ? 'text-[#F3F1ED]/60' : 'text-gray-600'}`}>
-                        {['Politique de confidentialité', 'Conditions générales de vente', 'Compte', 'FAQ'].map((link, i) => (
+                        {['Politique de confidentialité', 'Conditions générales de vente', 'FAQ'].map((link, i) => (
                             <li key={i}><a href="#" className="flex items-center gap-2 group text-inherit hover:text-gold transition-colors"><span className="text-xs group-hover:translate-x-1 transition-transform">›</span> {link}</a></li>
                         ))}
                     </ul>
